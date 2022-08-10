@@ -22,7 +22,7 @@ public class SMSUtils {
 
 
 	public static void sendMessage(String signName, String templateCode,String phoneNumbers,String param){
-		DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", "LTAI5t7CvKCie7LT1rF8jPva", "rjJ4JuSxYkvz8104OgnstE64qhidB4");
+		DefaultProfile profile = DefaultProfile.getProfile();
 		IAcsClient client = new DefaultAcsClient(profile);
 
 		SendSmsRequest request = new SendSmsRequest();
