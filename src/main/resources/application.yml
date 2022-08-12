@@ -1,6 +1,17 @@
 server:
   port: 8080
 spring:
+  redis:
+    port: 6379
+    host: localhost
+    database: 0 # redis默认给我们提供了16个数据库，我们可以设置为操作的是第0号数据库
+    # password:
+    jedis:
+      pool:
+        max-active: 8 #最大连接数
+        max-wait: 1ms #连接池最大阻塞等待时间
+        max-idle: 4 #连接池的最大空闲连接
+        min-idle: 0 #连接池中的最小空余连接
   application:
     # 应用的名称，可选
     name: reggie_take_out
