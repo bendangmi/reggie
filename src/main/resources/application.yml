@@ -4,6 +4,9 @@ spring:
   application:
     # 应用的名称，可选
     name: reggie_take_out
+  cache:
+    redis:
+      time-to-live: 1800000 #设置缓存数据的过期时间
   redis:
     port: 6379
     host: localhost
