@@ -8,6 +8,7 @@ import com.bdm.reggie.util.SMSUtils;
 import com.bdm.reggie.util.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @code Description
@@ -26,8 +28,13 @@ import java.util.Map;
 @RequestMapping("/user")
 @Slf4j
 public class UserController {
+
+
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     /**
      * 发送验证码
@@ -51,6 +58,10 @@ public class UserController {
 
             // 需要将生成的验证码保存到Session
             session.setAttribute(phone, code);
+
+            // 将生成的验证码缓存到Redis中，并且设置有效期为5分钟
+            redisTemplate.opsForValue().set(phone, code, 5, TimeUnit.MINUTES);
+
             return R.success("手机验证码发生成功！");
         }
         return R.error("短信发送失败！");
@@ -73,9 +84,12 @@ public class UserController {
 
         // 从Session中获取保存的验证码
         final Object codeInSession = session.getAttribute(phone);
+        
+        // 从Redis中取出缓冲验证码
+        final String verificationCode = redisTemplate.opsForValue().get(phone);
 
         // 进行验证码的对比（页面提交的验证码喝Session中保存的验证码对比）
-        if(codeInSession != null && codeInSession.equals(code)){
+        if(verificationCode != null && verificationCode.equals(code)){
             // 如果能够对比成功，说明登录成功
             final LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(User::getPhone, phone);
@@ -89,6 +103,10 @@ public class UserController {
                 userService.save(user);
             }
             session.setAttribute("user" , user.getId());
+
+            // 如果用户登录成功，删除Redis中缓冲的验证码
+            redisTemplate.delete(phone);
+
             return R.success(user);
 
         }
