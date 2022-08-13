@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.bdm.reggie.common.BaseContext;
 import com.bdm.reggie.common.R;
+import com.bdm.reggie.entity.SetmealDish;
 import com.bdm.reggie.entity.ShoppingCart;
+import com.bdm.reggie.service.SetmealDishService;
 import com.bdm.reggie.service.ShoppingCartService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ public class ShoppingCartController {
 
     @Autowired
     private ShoppingCartService shoppingCartService;
+
+    @Autowired
+    private SetmealDishService setmealDishService;
 
 
     /**
@@ -104,6 +109,40 @@ public class ShoppingCartController {
         queryWrapper.eq(ShoppingCart::getUserId, currentId);
         shoppingCartService.remove(queryWrapper);
         return R.success("成功清空购物车！");
+    }
+
+    /**
+     * 减少数量
+     * @param shoppingCart
+     * @return
+     */
+    @PostMapping("/sub")
+    public R<String> sub(@RequestBody ShoppingCart shoppingCart){
+        // 根据setmealId查询对应菜品减少数量
+        final Long setmealId = shoppingCart.getSetmealId();
+
+        // 获取用户id
+        final Long userId = BaseContext.getCurrentId();
+
+        final LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ShoppingCart::getUserId, userId);
+
+        if(setmealId != null){
+            // 套餐
+
+            queryWrapper.eq(ShoppingCart::getSetmealId, setmealId);
+        }else{
+            // 菜品
+            queryWrapper.eq(ShoppingCart::getDishId, shoppingCart.getDishId());
+        }
+
+        shoppingCart = shoppingCartService.getOne(queryWrapper);
+        if(shoppingCart.getNumber() > 1){
+            shoppingCart.setNumber(shoppingCart.getNumber() - 1);
+            shoppingCartService.updateById(shoppingCart);
+        }
+
+        return R.success("减少成功");
     }
 
 

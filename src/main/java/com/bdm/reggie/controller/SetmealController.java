@@ -146,6 +146,72 @@ public class SetmealController {
         return R.success(list);
     }
 
+    /**
+     * 根据id查询套餐信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public R<SetmealDto>getInfo(@PathVariable long id){
+        // 根据id查询套餐信息
+        final Setmeal setmeal = setmealService.getById(id);
+        final SetmealDto setmealDto = new SetmealDto();
+        BeanUtils.copyProperties(setmeal, setmealDto);
+
+        final LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SetmealDish::getDishId, id);
+        final List<SetmealDish> setmealDishList = setmealDishService.list(queryWrapper);
+
+        setmealDto.setSetmealDishes(setmealDishList);
+
+        return R.success(setmealDto);
+    }
+
+    /**
+     * 修改套餐信息
+     * @param setmealDto
+     * @return
+     */
+    @PutMapping
+    public R<String> update(@RequestBody SetmealDto setmealDto){
+        // 修改套餐
+        final Setmeal setmeal = new Setmeal();
+        BeanUtils.copyProperties(setmealDto, setmeal);
+        setmealService.updateById(setmeal);
+
+        // 修改套餐菜品
+        // 根据套餐id删除菜品
+        final Long setmealId = setmealDto.getId();
+        final LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SetmealDish::getSetmealId, setmealId);
+        setmealDishService.remove(queryWrapper);
+
+        // 添加新的菜品
+        final List<SetmealDish> setmealDishes = setmealDto.getSetmealDishes();
+        for(int i = 0; i < setmealDishes.size(); i++){
+            final SetmealDish setmealDish = setmealDishes.get(i);
+            setmealDish.setSetmealId(setmealId);
+            setmealDishes.set(i, setmealDish);
+        }
+        setmealDishService.saveBatch(setmealDishes);
+
+        return R.success("修改成功！");
+    }
+
+    /**
+     * 前端页面点击图片获取套餐数据
+     * @param id
+     * @return
+     */
+    @GetMapping("/dish/{id}")
+    public R<List<SetmealDish>> getFrontInfo(@PathVariable long id){
+
+        final LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SetmealDish::getSetmealId, id);
+        final List<SetmealDish> setmealDishList = setmealDishService.list(queryWrapper);
+
+        return R.success(setmealDishList);
+    }
 
 
 

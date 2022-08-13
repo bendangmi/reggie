@@ -456,12 +456,15 @@
             this.init()
           }
         },
-        mounted() {},
+        mounted() {
+
+        },
         methods: {
           async init() {
+
             querySetmealById(this.id).then((res) => {
               if (String(res.code) === '1') {
-                this.ruleForm = res.data
+
                 this.ruleForm.status = res.data.status === '1'
                 this.ruleForm.price = res.data.price / 100
                 this.imageUrl = `/common/download?name=${res.data.image}`
@@ -586,6 +589,7 @@
                     .then((res) => {
                       if (res.code === 1) {
                         this.$message.success('套餐修改成功！')
+
                         this.goBack()
                       } else {
                         this.$message.error(res.msg || '操作失败')
