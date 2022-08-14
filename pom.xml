@@ -15,7 +15,6 @@
         <version>2.3.7.RELEASE</version>
     </parent>
 
-
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -24,6 +23,14 @@
     </properties>
 
     <dependencies>
+
+        <!--Sharding-JDBC增强版的JDBC驱动，实现读写分离-->
+        <dependency>
+            <groupId>org.apache.shardingsphere</groupId>
+            <artifactId>sharding-jdbc-spring-boot-starter</artifactId>
+            <version>4.0.0-RC1</version>
+        </dependency>
+
         <!--阿里巴巴短信服务-->
         <dependency>
             <groupId>com.aliyun</groupId>
