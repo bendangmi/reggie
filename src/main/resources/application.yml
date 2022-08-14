@@ -9,9 +9,9 @@ spring:
       time-to-live: 1800000 #设置缓存数据的过期时间
   redis:
     port: 6379
-    host: localhost
+    host: 47.100.178.21
     database: 0 # redis默认给我们提供了16个数据库，我们可以设置为操作的是第0号数据库
-    # password:
+    password: root
     jedis:
       pool:
         max-active: 8 #最大连接数
